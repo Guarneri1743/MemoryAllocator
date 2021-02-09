@@ -1,9 +1,7 @@
 #pragma once
 #include "Allocator.h"
 
-template<
-	size_type kPageSize = PAGE_SIZE, 
-	size_type kAlignment = ALIGNMENT>
+template<size_type kPageSize = PAGE_SIZE, size_type kAlignment = ALIGNMENT>
 class ExplicitFreeListAllocator : public Allocator
 {
 public:

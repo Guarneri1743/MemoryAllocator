@@ -1,4 +1,3 @@
-// header "ExplicityFreeList.h"
 #include <assert.h>
 
 template<size_type kPageSize, size_type kAlignment>
@@ -97,21 +96,7 @@ void* ExplicitFreeListAllocator<kPageSize, kAlignment>::Allocate(const size_type
 
 	allocated_ += aligned_size;
 	freed_ -= aligned_size;
-
 	peak_ = std::max(peak_, allocated_);
-
-
-	//std::cout << "allocate: " << size << ", aligned_size: " << aligned_size << ", padding: " << padding << endl;
-	//std::cout << "fit_block: " << block_address << ", size: " << fit_block->size << endl;
-	//std::cout << "payload: " << payload_start << ", delta: " << payload_start - block_address << endl;
-
-	//auto cur = free_list_;
-	//while (cur != nullptr)
-	//{
-	//	std::cout << "free_list: " << reinterpret_cast<size_type>(cur) << ": " << cur->size << endl;
-	//	cur = cur->next;
-	//}
-	//std::cout << endl;
 
 	return reinterpret_cast<void*>(payload_start);
 }
@@ -183,16 +168,6 @@ void ExplicitFreeListAllocator<kPageSize, kAlignment>::Free(void* ptr)
 			cur = cur->next;
 		}
 	}
-
-	//std::cout << "free: " << address << ", " << block->size << endl;
-
-	//auto cur = free_list_;
-	//while (cur != nullptr)
-	//{
-	//	std::cout << "free_list: " << reinterpret_cast<size_type>(cur) << ": " << cur->size << endl;
-	//	cur = cur->next;
-	//}
-	//std::cout << endl;
 }
 
 template<size_type kPageSize, size_type kAlignment>
@@ -357,5 +332,3 @@ void ExplicitFreeListAllocator<kPageSize, kAlignment>::Remove(BlockPointer& node
 		}
 	}
 }
-
-// header "ExplicityFreeList.h"
