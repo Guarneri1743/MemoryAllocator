@@ -96,9 +96,9 @@ Statistics RandomAllocateAndFree(string title, Allocator* allocator, vector<size
 
 int main()
 {
-	Allocator* allocator1 = new ExplicitFreeListAllocator<>(1024 MB);
-	Allocator* allocator2 = new ExplicitFreeListAllocator<>(1024 MB);
-	Allocator* default_allocator = new DefaultAllocator<>();
+	Allocator* allocator1 = new ExplicitFreeListAllocator(1 MB);
+	Allocator* allocator2 = new ExplicitFreeListAllocator(1 MB);
+	Allocator* default_allocator = new DefaultAllocator();
 
 	// below 128 bytes
 	vector<size_type> small_allocation_sizes = { 1 BYTE, 3 BYTE, 4 BYTE, 7 BYTE, 8 BYTE, 16 BYTE, 27 BYTE, 32 BYTE, 57 BYTE, 64 BYTE, 77 BYTE, 96 BYTE};

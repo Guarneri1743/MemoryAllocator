@@ -9,10 +9,8 @@ typedef unsigned char byte;
 #define MB KB * (size_type)1024
 #define GB MB * (size_type)1024
 
-constexpr size_type MIN_ALIGNMENT = 8 BYTE;
 constexpr size_type ALIGNMENT = 8 BYTE;
 constexpr size_type PAGE_SIZE = 4 KB;
-constexpr size_type LARGE_BLOCK_THRESHOLD = 128 BYTE;
 
 class Allocator
 {
@@ -23,19 +21,9 @@ public:
 		Dynamic
 	};
 
-	Allocator(const size_type& capacity, const AllocationPolicy& allocation_policy)
-	{
-		start_ = nullptr;
-		capacity_ = capacity;
-		allocated_ = 0;
-		freed_ = capacity;
-		allocation_policy_ = allocation_policy;
-		peak_ = 0;
-	};
+	Allocator(const size_type& capacity, const size_type& alignment, const size_type& page_size, const AllocationPolicy& allocation_policy);
 
-	virtual ~Allocator()
-	{
-	};
+	virtual ~Allocator();
 
 	/// <summary>
 	/// allocate memory of requested size
@@ -50,61 +38,37 @@ public:
 	/// <param name="ptr"></param>
 	virtual void Free(void* ptr) = 0;
 
-	/// <summary>
-	/// start address of memory block
-	/// </summary>
-	/// <returns></returns>
-	void* GetNativePtr()
-	{
-		return start_;
-	}
+	size_type RoundUp(const size_type& alignment, const size_type& size);
 
 	/// <summary>
 	/// size of freed memory
 	/// </summary>
 	/// <returns></returns>
-	size_type FreedSize()
-	{
-		return freed_;
-	}
+	size_type FreedSize();
 
 	/// <summary>
 	/// size of allocated memory
 	/// </summary>
 	/// <returns></returns>
-	size_type AllocatedSize()
-	{
-		return allocated_;
-	}
+	size_type AllocatedSize();
 
 	/// <summary>
 	/// allocator capacity
 	/// </summary>
 	/// <returns></returns>
-	size_type Capacity()
-	{
-		return capacity_;
-	}
+	size_type Capacity();
 
 	/// <summary>
 	/// peak size of allocation
 	/// </summary>
 	/// <returns></returns>
-	size_type Peak()
-	{
-		return peak_;
-	}
+	size_type Peak();
 
 protected:
 	/// <summary>
 	/// allocation policy, static or dynamic
 	/// </summary>
 	AllocationPolicy allocation_policy_;
-
-	/// <summary>
-	/// start address
-	/// </summary>
-	void* start_;
 
 	/// <summary>
 	/// the capacity of allocator
@@ -125,4 +89,14 @@ protected:
 	/// peak allocation
 	/// </summary>
 	size_type peak_;
+
+	/// <summary>
+	/// alignment
+	/// </summary>
+	size_type alignment_;
+
+	/// <summary>
+	/// page size
+	/// </summary>
+	size_type page_size_;
 };

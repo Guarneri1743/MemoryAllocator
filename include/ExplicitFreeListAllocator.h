@@ -1,7 +1,6 @@
 #pragma once
 #include "Allocator.h"
 
-template<size_type kPageSize = PAGE_SIZE, size_type kAlignment = ALIGNMENT>
 class ExplicitFreeListAllocator : public Allocator
 {
 public:
@@ -18,6 +17,13 @@ public:
 		kDeferred
 	};
 
+	struct Span
+	{
+		size_type size;
+		Span* prev;
+		Span* next;
+	};
+
 	struct Block
 	{
 		size_type size;
@@ -25,17 +31,18 @@ public:
 		Block* next;
 	};
 
+	typedef Span* SpanPointer;
 	typedef Block* BlockPointer;
 
 public:
 	ExplicitFreeListAllocator(const size_type& capacity);
 
 	ExplicitFreeListAllocator(const size_type& capacity,
-					 const PlacementPolicy& placement_policy);
+							  const PlacementPolicy& placement_policy);
 
 	ExplicitFreeListAllocator(const size_type& capacity,
-					 const PlacementPolicy& placement_policy,
-					 CoalescingPolicy& coalescing_policy);
+							  const PlacementPolicy& placement_policy,
+							  CoalescingPolicy& coalescing_policy);
 
 	/// <summary>
 	/// explicit free list constructor
@@ -44,9 +51,11 @@ public:
 	/// <param name="placement_policy">placement policy</param>
 	/// <param name="coalescing_policy">coalescing policy</param>
 	ExplicitFreeListAllocator(const size_type& capacity,
-					 const PlacementPolicy& placement_policy,
-					 const CoalescingPolicy& coalescing_policy,
-					 const AllocationPolicy& allocation_policy);
+							  const size_type& alignment,
+							  const size_type& page_size,
+							  const PlacementPolicy& placement_policy,
+							  const CoalescingPolicy& coalescing_policy,
+							  const AllocationPolicy& allocation_policy);
 
 	/// <summary>
 	/// explicit free list destructor
@@ -79,28 +88,38 @@ private:
 	CoalescingPolicy coalescing_policy_;
 
 	/// <summary>
-	/// free blocks list
+	/// the head of memory block
 	/// </summary>
-	BlockPointer free_list_;
+	BlockPointer block_list_head_;
 
 	/// <summary>
-	/// the last fit block, required by 'NextFit' policy
+	/// the tail of memory block
 	/// </summary>
-	BlockPointer last_fit_;
+	BlockPointer block_list_tail_;
+
+	/// <summary>
+	/// free span list
+	/// </summary>
+	SpanPointer free_list_;
+
+	/// <summary>
+	/// last fit span
+	/// </summary>
+	SpanPointer last_fit_;
 
 	/// <summary>
 	/// Allocate a block
 	/// </summary>
 	/// <param name="size"></param>
-	void AllocateBlock(const size_type& size);
+	void AllocateBlock(const size_type& size, SpanPointer& out_block);
 
 	/// <summary>
-	/// find a fit block
+	/// find a fit Span
 	/// </summary>
 	/// <param name="found"></param>
 	/// <param name="aligned_size"></param>
 	/// <param name="padding"></param>
-	void Find(const size_type& aligned_size, BlockPointer& found);
+	void Find(const size_type& aligned_size, SpanPointer& found);
 
 	/// <summary>
 	/// first fit
@@ -108,7 +127,7 @@ private:
 	/// <param name="found"></param>
 	/// <param name="aligned_size"></param>
 	/// <param name="padding"></param>
-	void FindFirstFit(const size_type& aligned_size, BlockPointer& found);
+	void FindFirstFit(const size_type& aligned_size, SpanPointer& found);
 
 	/// <summary>
 	/// next fit
@@ -116,7 +135,7 @@ private:
 	/// <param name="found"></param>
 	/// <param name="aligned_size"></param>
 	/// <param name="padding"></param>
-	void FindNextFit(const size_type& aligned_size, BlockPointer& found);
+	void FindNextFit(const size_type& aligned_size, SpanPointer& found);
 
 	/// <summary>
 	/// best fit
@@ -124,27 +143,26 @@ private:
 	/// <param name="found"></param>
 	/// <param name="aligned_size"></param>
 	/// <param name="padding"></param>
-	void FindBestFit(const size_type& aligned_size, BlockPointer& found);
+	void FindBestFit(const size_type& aligned_size, SpanPointer& found);
 
 	/// <summary>
 	/// insert a new node after given node
 	/// </summary>
 	/// <param name="node"></param>
 	/// <param name="to_insert"></param>
-	void Insert(BlockPointer& node, BlockPointer& to_insert);
+	void Insert(SpanPointer& node, SpanPointer& to_insert);
 
 	/// <summary>
 	/// remove given node from linked list
 	/// </summary>
 	/// <param name="node"></param>
-	void Remove(BlockPointer& node);
+	void Remove(SpanPointer& span);
 
 	/// <summary>
-	/// determine wheather the alignment is the power of 2 or not
+	/// Merge
 	/// </summary>
-	/// <param name="alignment"></param>
-	/// <returns></returns>
-	bool IsAligned(const size_type& alignment);
+	/// <param name="node"></param>
+	void Merge(const size_type& address, SpanPointer& span);
 
 	/// <summary>
 	/// align memory
@@ -166,5 +184,3 @@ private:
 	/// <param name="_allocator"></param>
 	ExplicitFreeListAllocator(ExplicitFreeListAllocator&& _allocator) = delete;
 };
-
-#include "detail/ExplicitFreeListAllocator.inl"
