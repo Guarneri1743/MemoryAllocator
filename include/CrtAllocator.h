@@ -1,11 +1,11 @@
 #pragma once
 #include "Allocator.h"
 
-class DefaultAllocator : public Allocator
+class CrtAllocator : public Allocator
 {
 public:
-	DefaultAllocator();
-	~DefaultAllocator();
+	CrtAllocator();
+	~CrtAllocator();
 
 	void* Allocate(const size_type& size);
 	void Free(void* ptr);

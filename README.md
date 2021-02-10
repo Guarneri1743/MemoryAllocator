@@ -4,6 +4,28 @@ A custom memory allocator based on explicit free list
 
 There are several commonly used approaches to implement custom memory allocator, such as implicit free list, explicit free list, segregated free list and balanced binary search tree, each of them has its own pros and cons. here I use explicit free list to implement my custom memory allocator in purpose of studying and practicing the knowledge of memory management.
 
+## Install
+
+No binary libs required.
+
+Option 1:
+
+- Clone this [repo](https://github.com/Guarneri1743/MemoryAllocator.git) 
+- Run 'setup.bat' to generate solution files
+
+Option 2:
+
+- Copy-paste the include folder to use it. Done.
+
+## Usage
+
+Simple Example:
+
+	Allocator* allocator = new MemoryAllocator(1 MB);
+	auto buffer = allocator->Allocate(64 KB);
+	//...
+	allocator->Free(buffer);
+
 
 
 ## Span

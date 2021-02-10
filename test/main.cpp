@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
-#include "ExplicitFreeListAllocator.h"
-#include "DefaultAllocator.h"
+#include "MemoryAllocator.h"
 #include <chrono>
 #include <vector>
 #include <iomanip>
@@ -96,8 +95,8 @@ Statistics RandomAllocateAndFree(string title, Allocator* allocator, vector<size
 
 int main()
 {
-	Allocator* allocator1 = new ExplicitFreeListAllocator(1 MB);
-	Allocator* allocator2 = new ExplicitFreeListAllocator(1 MB);
+	Allocator* allocator1 = new MemoryAllocator(1 MB);
+	Allocator* allocator2 = new MemoryAllocator(1 MB);
 	Allocator* default_allocator = new DefaultAllocator();
 
 	// below 128 bytes
