@@ -26,7 +26,14 @@ Simple Example:
 	//...
 	allocator->Free(buffer);
 
+Specify PlacementPolicy:
 
+	Allocator* allocator = new MemoryAllocator(1 MB, ExplicitFreeListAllocator::PlacementPolicy::kBestFit);
+	auto buffer = allocator->Allocate(64 KB);
+	//...
+	allocator->Free(buffer);
+
+Specify CoalescingPolicy: WIP
 
 ## Span
 **Span** is used to represent an allocation or a free memory span in the memory layout. Some essential information will be needed when we want to track the address, size and extra metadata of the allocation or free span. So the structure of a span is as following.

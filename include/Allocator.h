@@ -17,8 +17,8 @@ class Allocator
 public:
 	enum class AllocationPolicy
 	{
-		Static,
-		Dynamic
+		kStatic,
+		kDynamic
 	};
 
 	Allocator(const size_type& capacity, const size_type& alignment, const size_type& page_size, const AllocationPolicy& allocation_policy);

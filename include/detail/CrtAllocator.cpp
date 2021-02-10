@@ -1,7 +1,7 @@
 #include "CrtAllocator.h"
 #include <stdlib.h>
 
-CrtAllocator::CrtAllocator() : Allocator(0, ALIGNMENT, PAGE_SIZE, AllocationPolicy::Dynamic)
+CrtAllocator::CrtAllocator() : Allocator(0, ALIGNMENT, PAGE_SIZE, AllocationPolicy::kDynamic)
 {
 	capacity_ = 0;
 }

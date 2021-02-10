@@ -8,7 +8,7 @@ ExplicitFreeListAllocator::ExplicitFreeListAllocator(const size_type& capacity) 
 																												   PAGE_SIZE,
 																												   PlacementPolicy::kFirstFit,
 																												   CoalescingPolicy::kImmediate,
-																												   AllocationPolicy::Dynamic)
+																												   AllocationPolicy::kDynamic)
 {}
 
 
@@ -18,7 +18,7 @@ ExplicitFreeListAllocator::ExplicitFreeListAllocator(const size_type& capacity,
 																																 PAGE_SIZE,
 																																 placement_policy,
 																																 CoalescingPolicy::kImmediate,
-																																 AllocationPolicy::Dynamic)
+																																 AllocationPolicy::kDynamic)
 {}
 
 
@@ -29,7 +29,7 @@ ExplicitFreeListAllocator::ExplicitFreeListAllocator(const size_type& capacity,
 																															 PAGE_SIZE,
 																															 placement_policy,
 																															 coalescing_policy,
-																															 AllocationPolicy::Dynamic)
+																															 AllocationPolicy::kDynamic)
 {}
 
 
@@ -77,7 +77,7 @@ void* ExplicitFreeListAllocator::Allocate(const size_type& size)
 
 	Find(aligned_size, fit_span);
 
-	if (allocation_policy_ == AllocationPolicy::Dynamic)
+	if (allocation_policy_ == AllocationPolicy::kDynamic)
 	{
 		// allocate new span and search again
 		if (fit_span == nullptr)
