@@ -117,4 +117,5 @@ Merging is needed when a free span has been put into free list, in order to prev
 
 ## Future Work
 
-Use Red-Black tree or AVL tree to optimize the time complexity of allocation and free.
+- Use Red-Black tree or AVL tree to optimize the time complexity of allocation and free.
+- Thread safe.
