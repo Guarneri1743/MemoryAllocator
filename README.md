@@ -6,22 +6,38 @@ There are several commonly used approaches to implement custom memory allocator,
 
 
 
-## Block
-**Block** is used to represent an allocation or a free memory block in the entire continues memory block. Some essential information will be needed when we want to track the address, size and extra metadata of the allocation or free block. So the structure of a block is as following.
+## Span
+**Span** is used to represent an allocation or a free memory span in the memory layout. Some essential information will be needed when we want to track the address, size and extra metadata of the allocation or free span. So the structure of a span is as following.
 
 - address(implicit)
 - size
 - prev(explicit)
 - next(explicit)
 
-block struct:
+**Span structure:**
 
-    struct Block
+    struct Span
     {
-    	size_type size;
-    	Block* prev;
-    	Block* next;
+    	size_type size; 
+    	Span* prev;
+    	Span* next;
     };
+
+## Block
+**Block** stands for each allocation from malloc(), a **Block** may contains many free **Span**s. A block list is maintained to track every allocation from malloc, so that we can free the allocations later. 
+
+**Block structure:**
+
+	struct Block
+	{
+		size_type size; //optional
+		Block* prev;
+		Block* next;
+	};
+
+## Memory Layout
+
+Neither **Blocks** or **Spans** are guaranteed to be continueous in the memory layout.
 
 ## Allocation
 
@@ -70,6 +86,6 @@ put the free block at address-ordered position of free list.
 
 Merging is needed when a free block has been put into free list, in order to prevent the increasing of free blocks.
 
-## TODO
+## Future Work
 
 Use Red-Black tree or AVL tree to optimize the time complexity of allocation and free.
