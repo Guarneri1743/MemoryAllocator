@@ -96,7 +96,7 @@ flag: indicates if the span is allocated
 
 #### First Fit: 
 
-Iterate the free list util a free span fits the required allocation size
+Iterate the free list until a free span fits the required allocation size
 
 - Pros: fast
 - Cons: more memory fragmentation
@@ -105,7 +105,7 @@ Iterate the free list util a free span fits the required allocation size
 
 #### Next Fit: 
 
-Iterate the free list starting from **last fit** util a free span fits
+Iterate the free list starting from **last fit** until a free span fits
 
 - Pros: relatively fast compared with **First Fit**
 - Cons: more memory fragmentation
