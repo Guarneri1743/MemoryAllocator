@@ -137,7 +137,7 @@ put the free span at address-ordered position of free list.
 
 #### Coalescing:
 
-A coalescing is needed when a free span has been put into free list, in order to prevent the increasing of free spans.
+A coalescing is needed after a free span has been put into free list, in order to prevent the increasing of memory fragmentation.
 
 ## Future Work
 
