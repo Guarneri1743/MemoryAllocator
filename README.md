@@ -21,17 +21,39 @@ Option 2:
 
 Simple Example:
 
-	Allocator* allocator = new MemoryAllocator(1 MB);
-	auto buffer = allocator->Allocate(64 KB);
-	//...
-	allocator->Free(buffer);
+	#include "MemoryAllocator.h"
+
+	int main()
+	{
+		Allocator* allocator = new MemoryAllocator(16 MB);
+		auto buffer1 = allocator->Allocate(64 KB);
+		//...
+		allocator->Free(buffer1);
+
+		auto buffer2 = allocator->Allocate(1 MB);
+		//...
+		allocator->Free(buffer2);
+
+		delete allocator;
+	}
 
 Specify PlacementPolicy:
 
-	Allocator* allocator = new MemoryAllocator(1 MB, ExplicitFreeListAllocator::PlacementPolicy::kBestFit);
-	auto buffer = allocator->Allocate(64 KB);
-	//...
-	allocator->Free(buffer);
+	#include "MemoryAllocator.h"
+
+	int main()
+	{
+		Allocator* allocator = new MemoryAllocator(16 MB, ExplicitFreeListAllocator::PlacementPolicy::kBestFit);
+		auto buffer1 = allocator->Allocate(64 KB);
+		//...
+		allocator->Free(buffer1);
+
+		auto buffer2 = allocator->Allocate(1 MB);
+		//...
+		allocator->Free(buffer2);
+
+		delete allocator;
+	}
 
 Specify CoalescingPolicy: WIP
 
@@ -44,7 +66,7 @@ Specify CoalescingPolicy: WIP
 - **next(explicit)**
 - footer boundary tag(implicit)
 
-**BoundaryTag:**
+**Boundary Tag:**
 
     struct BoundaryTag
     {
@@ -107,15 +129,15 @@ put the free span at the beginning or end of free list.
 - Pros: fast
 - Cons: more memory fragmentation
 
-#### Sort by address:
+#### Address Ordered:
 put the free span at address-ordered position of free list.
 
 - Pros: less memory fragmentation
 - Cons: relatively slow
 
-#### Merge:
+#### Coalescing:
 
-Merging is needed when a free span has been put into free list, in order to prevent the increasing of free spans.
+A coalescing is needed when a free span has been put into free list, in order to prevent the increasing of free spans.
 
 ## Future Work
 
