@@ -3,13 +3,14 @@
 typedef unsigned long long size_type;
 typedef unsigned char byte;
 #define MAX_SIZE ((size_type)0xffffffffffffffff)
+#define FLAG_MASK ((size_type)0x1)
 
 #define BYTE * (size_type)1
 #define KB BYTE * (size_type)1024
 #define MB KB * (size_type)1024
 #define GB MB * (size_type)1024
 
-constexpr size_type ALIGNMENT = 8 BYTE;
+constexpr size_type ALIGNMENT = 16 BYTE;
 constexpr size_type PAGE_SIZE = 4 KB;
 
 class Allocator

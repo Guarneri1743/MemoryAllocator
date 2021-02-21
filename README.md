@@ -35,38 +35,40 @@ Specify PlacementPolicy:
 
 Specify CoalescingPolicy: WIP
 
-## Span
+## Span & Boundary Tag
 **Span** is used to represent an allocation or a free memory span in the memory layout. Some essential information will be needed when we want to track the address, size and extra metadata of the allocation or free span. So the structure of a span is as following.
 
 - address(implicit)
-- size
-- prev(explicit)
-- next(explicit)
+- **header boundary tag(explicit)**
+- **prev(explicit)**
+- **next(explicit)**
+- footer boundary tag(implicit)
 
-**Span structure:**
+**BoundaryTag:**
+
+    struct BoundaryTag
+    {
+    	size_t size_and_flag; //1 bit represents the stat of span and the rest bits represents the span size
+    };
+
+size: payload size
+
+flag: indicates if the span is allocated
+
+
+**Span:**
 
     struct Span
     {
-    	size_type size; 
+    	BoundaryTag size; 
     	Span* prev;
     	Span* next;
     };
 
-## Block
-**Block** stands for each allocation from malloc(), a **Block** may contains many free **Span**s. A **block list** is maintained to track every allocation from malloc, so that we are able to free them later. 
+## Free List
 
-**Block structure:**
-
-	struct Block
-	{
-		size_type size; //optional
-		Block* prev;
-		Block* next;
-	};
-
-## Memory Layout
-
-Neither **Blocks** or **Spans** are guaranteed to be continueous in the memory layout.
+- A Doubly linked list contains **Span** nodes. 
+- The node of **Free List** is not guaranteed to be continueous in the memory layout.
 
 ## Allocation
 

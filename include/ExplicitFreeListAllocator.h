@@ -17,22 +17,20 @@ public:
 		kDeferred
 	};
 
+	struct BoundaryTag
+	{
+		size_type size_and_flag;
+	};
+
 	struct Span
 	{
-		size_type size;
+		BoundaryTag tag;
 		Span* prev;
 		Span* next;
 	};
 
-	struct Block
-	{
-		size_type size;
-		Block* prev;
-		Block* next;
-	};
-
+	typedef BoundaryTag* BoundaryTagPointer;
 	typedef Span* SpanPointer;
-	typedef Block* BlockPointer;
 
 public:
 	ExplicitFreeListAllocator(const size_type& capacity);
@@ -42,7 +40,7 @@ public:
 
 	ExplicitFreeListAllocator(const size_type& capacity,
 							  const PlacementPolicy& placement_policy,
-							  CoalescingPolicy& coalescing_policy);
+							  const CoalescingPolicy& coalescing_policy);
 
 	/// <summary>
 	/// explicit free list constructor
@@ -75,8 +73,14 @@ public:
 	/// <param name="ptr"></param>
 	void Free(void* ptr);
 
-private:
+	/// <summary>
+	/// Determine whether a pointer is belong to this allocator
+	/// </summary>
+	/// <param name="address"></param>
+	/// <returns></returns>
+	bool Contains(const size_type& address);
 
+private:
 	/// <summary>
 	/// placement policy
 	/// </summary>
@@ -86,16 +90,6 @@ private:
 	/// coalescing policy
 	/// </summary>
 	CoalescingPolicy coalescing_policy_;
-
-	/// <summary>
-	/// the head of memory block
-	/// </summary>
-	BlockPointer block_list_head_;
-
-	/// <summary>
-	/// the tail of memory block
-	/// </summary>
-	BlockPointer block_list_tail_;
 
 	/// <summary>
 	/// free span list
@@ -108,10 +102,19 @@ private:
 	SpanPointer last_fit_;
 
 	/// <summary>
-	/// Allocate a block
+	/// pointer to heap 
 	/// </summary>
-	/// <param name="size"></param>
-	void AllocateBlock(const size_type& size, SpanPointer& out_block);
+	void* heap;
+
+	/// <summary>
+	/// start address
+	/// </summary>
+	size_type heap_start_address;
+
+	/// <summary>
+	/// end address
+	/// </summary>
+	size_type heap_end;
 
 	/// <summary>
 	/// find a fit Span
@@ -146,23 +149,138 @@ private:
 	void FindBestFit(const size_type& aligned_size, SpanPointer& found);
 
 	/// <summary>
-	/// insert a new node after given node
+	/// insert 
 	/// </summary>
-	/// <param name="node"></param>
-	/// <param name="to_insert"></param>
-	void Insert(SpanPointer& node, SpanPointer& to_insert);
+	/// <param name="address"></param>
+	/// <param name="span"></param>
+	void InsertToFreeList(const size_type& address, SpanPointer& span);
 
 	/// <summary>
 	/// remove given node from linked list
 	/// </summary>
 	/// <param name="node"></param>
-	void Remove(SpanPointer& span);
+	void RemoveFromFreeList(SpanPointer& span);
 
 	/// <summary>
-	/// Merge
+	/// coalescing
 	/// </summary>
 	/// <param name="node"></param>
-	void Merge(const size_type& address, SpanPointer& span);
+	void Coalesce(SpanPointer& span, SpanPointer& merged_span, size_type& merged_span_address);
+
+	/// <summary>
+	/// split
+	/// </summary>
+	/// <param name="span"></param>
+	/// <param name="left_size"></param>
+	/// <param name="right_size"></param>
+	/// <param name="left"></param>
+	/// <param name="right"></param>
+	/// <param name="left_addr"></param>
+	/// <param name="right_addr"></param>
+	void Split(SpanPointer& span, 
+			   const size_type& left_size, 
+			   const size_type& right_size, 
+			   SpanPointer& left, 
+			   SpanPointer& right, 
+			   size_type& left_addr, 
+			   size_type& right_addr);
+
+	SpanPointer CreateSpan(const size_type& address, const size_type& size);
+
+	/// <summary>
+	/// Mask out flag
+	/// </summary>
+	/// <param name="tag"></param>
+	/// <returns></returns>
+	bool IsFree(const BoundaryTag& tag);
+
+	/// <summary>
+	/// Mask out size
+	/// </summary>
+	/// <param name="tag"></param>
+	/// <returns></returns>
+	size_type GetSize(const BoundaryTag& tag);
+
+	/// <summary>
+	/// set size
+	/// </summary>
+	/// <param name="tag"></param>
+	/// <param name="size"></param>
+	void SetSize(BoundaryTag& tag, const size_type& size);
+
+	/// <summary>
+	/// set flag
+	/// </summary>
+	/// <param name="tag"></param>
+	/// <param name="allocated"></param>
+	void SetFlag(BoundaryTag& tag, bool allocated);
+
+	/// <summary>
+	/// set size and flag
+	/// </summary>
+	/// <param name="tag"></param>
+	/// <param name="size"></param>
+	/// <param name="allocated"></param>
+	void SetSizeAndFlag(BoundaryTag& tag, const size_type& size, bool allocated);
+
+	/// <summary>
+	/// set flag and footer
+	/// </summary>
+	/// <param name="span"></param>
+	/// <param name="allocated"></param>
+	void SetFlag(SpanPointer& span, bool allocated);
+
+	/// <summary>
+	/// set size, flag and footer
+	/// </summary>
+	/// <param name="span"></param>
+	/// <param name="size"></param>
+	/// <param name="allocated"></param>
+	void SetSizeAndFlag(SpanPointer& span, const size_type& size, bool allocated);
+
+	/// <summary>
+	/// set flag and footer
+	/// </summary>
+	/// <param name="address"></param>
+	/// <param name="span"></param>
+	/// <param name="allocated"></param>
+	void SetFlag(const size_type& address, SpanPointer& span, bool allocated);
+
+	/// <summary>
+	/// set size, flag and footer
+	/// </summary>
+	/// <param name="address"></param>
+	/// <param name="span"></param>
+	/// <param name="size"></param>
+	/// <param name="allocated"></param>
+	void SetSizeAndFlag(const size_type& address, SpanPointer& span, const size_type& size, bool allocated);
+
+	/// <summary>
+	/// sync footer
+	/// </summary>
+	/// <param name="address"></param>
+	/// <param name="size"></param>
+	/// <param name="tag"></param>
+	void SyncFooter(const size_type& address, const size_type& size, const BoundaryTag& tag);
+
+	/// <summary>
+	/// find left span
+	/// </summary>
+	/// <param name="current_address"></param>
+	/// <param name="left"></param>
+	/// <param name="left_address"></param>
+	/// <param name="left_size"></param>
+	void FindLeftSpan(const size_type& current_address, SpanPointer& left, size_type& left_address, size_type& left_size);
+
+	/// <summary>
+	/// find right span
+	/// </summary>
+	/// <param name="current_address"></param>
+	/// <param name="cur_size"></param>
+	/// <param name="right"></param>
+	/// <param name="right_address"></param>
+	/// <param name="right_size"></param>
+	void FindRightSpan(const size_type& current_address, const size_type& cur_size, SpanPointer& right, size_type& right_address, size_type& right_size);
 
 	/// <summary>
 	/// align memory
@@ -184,3 +302,5 @@ private:
 	/// <param name="_allocator"></param>
 	ExplicitFreeListAllocator(ExplicitFreeListAllocator&& _allocator) = delete;
 };
+
+constexpr size_type MIN_SPAN_SIZE = sizeof(ExplicitFreeListAllocator::Span) + sizeof(ExplicitFreeListAllocator::BoundaryTag) + ALIGNMENT;
