@@ -58,7 +58,7 @@ Specify PlacementPolicy:
 Specify CoalescingPolicy: WIP
 
 ## Span & Boundary Tag
-**Span** is used to represent an allocation or a free memory span in the memory layout. Some essential information will be needed when we want to track the address, size and extra metadata of the allocation or free span. So the structure of a span is as following.
+**Span** is used to represent an allocation or a free memory span in the memory layout. Extra space reserved for the boundary tags which indicate the metadata of memory span. Therefore the structure of span is as following.
 
 - address(implicit)
 - **header boundary tag(explicit)**
@@ -70,12 +70,12 @@ Specify CoalescingPolicy: WIP
 
     struct BoundaryTag
     {
-    	size_t size_and_flag; //1 bit represents the stat of span and the rest bits represents the span size
+    	size_t size_and_flag; 
     };
 
-size: payload size
+size: 31 bits for payload size
 
-flag: indicates if the span is allocated
+flag: 1 bit (used/unused) for flag
 
 
 **Span:**
@@ -89,7 +89,7 @@ flag: indicates if the span is allocated
 
 ## Free List
 
-- A Doubly linked list contains **Span** nodes. 
+- A doubly linked list contains **Span** nodes. 
 - The node of **Free List** is not guaranteed to be continueous in the memory layout.
 
 ## Allocation
