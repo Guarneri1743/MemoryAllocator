@@ -23,6 +23,7 @@ public:
 
 	void Dump()
 	{
+		cout << "===========================================================================" << endl;
 		cout << "[" << title_ << "]" << endl;
 		cout << "Execution Time: " << execution_times_ << " Times" << endl;
 		cout << "Allocation Time: " << setprecision(6) << allocation_time_ << " ms" << endl;

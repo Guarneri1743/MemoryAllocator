@@ -3,7 +3,8 @@
 #include <assert.h>
 #include <algorithm>
 
-constexpr mem_size_t MIN_SPAN_SIZE = sizeof(ExplicitFreeListAllocator::Span) + sizeof(ExplicitFreeListAllocator::BoundaryTag) + ALIGNMENT;
+constexpr mem_size_t kMinSpanSize = sizeof(ExplicitFreeListAllocator::Span) + sizeof(ExplicitFreeListAllocator::BoundaryTag) + kAlignment;
+constexpr mem_size_t kFreeMask = 0x1;
 
 ExplicitFreeListAllocator::ExplicitFreeListAllocator(const mem_size_t& capacity) :
 	ExplicitFreeListAllocator(capacity,
@@ -48,7 +49,7 @@ void* ExplicitFreeListAllocator::Allocate(const mem_size_t& size)
 
 	mem_size_t aligned_size, padding;
 
-	Align(size, ALIGNMENT, aligned_size, padding);
+	Align(size, kAlignment, aligned_size, padding);
 
 	Find(aligned_size, fit_span);
 
@@ -59,7 +60,7 @@ void* ExplicitFreeListAllocator::Allocate(const mem_size_t& size)
 
 	// split the fit span if there is some extra space
 	mem_size_t extra_space = GetSize(fit_span->tag) - aligned_size;
-	if (extra_space > MIN_SPAN_SIZE)
+	if (extra_space > kMinSpanSize)
 	{
 		SpanPointer left, right;
 		mem_size_t left_addr, right_addr;
@@ -148,7 +149,7 @@ void ExplicitFreeListAllocator::FindNextFit(const mem_size_t& aligned_size, Span
 
 void ExplicitFreeListAllocator::FindBestFit(const mem_size_t& aligned_size, SpanPointer& found)
 {
-	mem_size_t min_span = MAX_SIZE;
+	mem_size_t min_span = kMaxSize;
 	SpanPointer min_span_pointer = nullptr;
 	SpanPointer cur = free_list_;
 
@@ -375,27 +376,27 @@ void ExplicitFreeListAllocator::SetSizeAndFlag(const mem_size_t& address, SpanPo
 
 inline bool ExplicitFreeListAllocator::IsFree(const BoundaryTag& tag)
 {
-	return (tag.size_and_flag & FLAG_MASK) == 0;
+	return (tag.size_and_flag & kFreeMask) == 0;
 }
 
 inline mem_size_t ExplicitFreeListAllocator::GetSize(const BoundaryTag& tag)
 {
-	return tag.size_and_flag & ~FLAG_MASK;
+	return tag.size_and_flag & ~kFreeMask;
 }
 
 inline void ExplicitFreeListAllocator::SetSize(BoundaryTag& tag, const mem_size_t& size)
 {
-	tag.size_and_flag = (size & ~FLAG_MASK) | (tag.size_and_flag & FLAG_MASK);
+	tag.size_and_flag = (size & ~kFreeMask) | (tag.size_and_flag & kFreeMask);
 }
 
 inline void ExplicitFreeListAllocator::SetFlag(BoundaryTag& tag, bool allocated)
 {
-	tag.size_and_flag = (allocated ? 0x1 : 0x0) | (tag.size_and_flag & ~FLAG_MASK);
+	tag.size_and_flag = (allocated ? 0x1 : 0x0) | (tag.size_and_flag & ~kFreeMask);
 }
 
 inline void ExplicitFreeListAllocator::SetSizeAndFlag(BoundaryTag& tag, const mem_size_t& size, bool allocated)
 {
-	tag.size_and_flag = (allocated ? 0x1 : 0x0) | (size & ~FLAG_MASK);
+	tag.size_and_flag = (allocated ? 0x1 : 0x0) | (size & ~kFreeMask);
 }
 
 inline void ExplicitFreeListAllocator::SyncFooter(const mem_size_t& address, const mem_size_t& size, const BoundaryTag& tag)
