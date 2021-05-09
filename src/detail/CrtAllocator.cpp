@@ -1,15 +1,14 @@
 #include "CrtAllocator.h"
 #include <stdlib.h>
 
-CrtAllocator::CrtAllocator() : Allocator(0, ALIGNMENT, PAGE_SIZE, AllocationPolicy::kDynamic)
+CrtAllocator::CrtAllocator() 
 {
-	capacity_ = 0;
 }
 
 CrtAllocator::~CrtAllocator()
 {}
 
-void* CrtAllocator::Allocate(const size_type& size)
+void* CrtAllocator::Allocate(const mem_size_t& size)
 {
 	return malloc(size);
 }

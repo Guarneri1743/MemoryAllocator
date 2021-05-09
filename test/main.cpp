@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
-#include "MemoryAllocator.h"
+#include "ExplicitFreeListAllocator.h"
+#include "CrtAllocator.h"
 #include <chrono>
 #include <vector>
 #include <iomanip>
@@ -18,9 +19,7 @@ public:
 	string title_;
 	double allocation_time_;
 	double free_time_;
-	size_type peak_;
-	size_type capacity_;
-	size_type execution_times_;
+	mem_size_t execution_times_;
 
 	void Dump()
 	{
@@ -30,19 +29,11 @@ public:
 		cout << "Free Time: " << setprecision(6) << free_time_ << " ms" << endl;
 		cout << "Allocation Time Per Execution: " << setprecision(6) << allocation_time_ / (double)execution_times_ << " ms/Time" <<endl;
 		cout << "Free Time Per Execution: " << setprecision(6) << free_time_ / (double)execution_times_ << " ms/Time" << endl;
-		if (peak_ > 0)
-		{
-			cout << "Peak: " << peak_ << " Byte(" << peak_ / (1 MB) << " MB)" << endl;
-		}
-		if (capacity_ > 0)
-		{
-			cout << "Capacity: " << capacity_ << " Byte(" << capacity_ / (1 MB) << " MB)" << endl;
-		}
 		cout << "===========================================================================" << endl;
 	}
 };
 
-Statistics AllocateAndFree(string title, Allocator* allocator, vector<size_type> allocation_sizes)
+Statistics AllocateAndFree(string title, ExplicitFreeListAllocator* allocator, vector<mem_size_t> allocation_sizes)
 {
 	Statistics ret(title);
 
@@ -60,14 +51,12 @@ Statistics AllocateAndFree(string title, Allocator* allocator, vector<size_type>
 		allocator->Free(addr);
 	}
 	ret.free_time_ = (double)(chrono::steady_clock::now() - start).count() / 1e+3f;
-	ret.peak_ = allocator->Peak();
-	ret.capacity_ = allocator->Capacity();
 	ret.execution_times_ = allocation_sizes.size();
 
 	return ret;
 }
 
-Statistics RandomAllocateAndFree(string title, Allocator* allocator, vector<size_type> allocation_sizes)
+Statistics RandomAllocateAndFree(string title, ExplicitFreeListAllocator* allocator, vector<mem_size_t> allocation_sizes)
 {
 	Statistics ret(title);
 
@@ -86,8 +75,6 @@ Statistics RandomAllocateAndFree(string title, Allocator* allocator, vector<size
 		allocator->Free(addr);
 	}
 	ret.free_time_ = (double)(chrono::steady_clock::now() - start).count() / 1e+3f;
-	ret.peak_ = allocator->Peak();
-	ret.capacity_ = allocator->Capacity();
 	ret.execution_times_ = allocation_sizes.size();
 
 	return ret;
@@ -95,25 +82,18 @@ Statistics RandomAllocateAndFree(string title, Allocator* allocator, vector<size
 
 int main()
 {
-	Allocator* allocator1 = new MemoryAllocator(128 MB);
-	Allocator* allocator2 = new MemoryAllocator(128 MB);
-	Allocator* default_allocator = new DefaultAllocator();
+	ExplicitFreeListAllocator* allocator1 = new ExplicitFreeListAllocator(128 MB);
+	ExplicitFreeListAllocator* allocator2 = new ExplicitFreeListAllocator(128 MB);
+	CrtAllocator* default_allocator = new CrtAllocator();
 
 	// below 128 bytes
-	vector<size_type> small_allocation_sizes = { 1 BYTE, 3 BYTE, 4 BYTE, 7 BYTE, 8 BYTE, 16 BYTE, 27 BYTE, 32 BYTE, 57 BYTE, 64 BYTE, 77 BYTE, 96 BYTE};
+	vector<mem_size_t> small_allocation_sizes = { 1 BYTE, 3 BYTE, 4 BYTE, 7 BYTE, 8 BYTE, 16 BYTE, 27 BYTE, 32 BYTE, 57 BYTE, 64 BYTE, 77 BYTE, 96 BYTE};
 
 	// above 128 bytes
-	vector<size_type> large_allocation_sizes = { 128 BYTE, 1 KB, 2 KB, 4 KB, 16 KB, 64 KB, 1 MB, 4 MB, 32 MB, 64 MB };
+	vector<mem_size_t> large_allocation_sizes = { 128 BYTE, 1 KB, 2 KB, 4 KB, 16 KB, 64 KB, 1 MB, 4 MB, 32 MB, 64 MB };
 
 	AllocateAndFree("Small Size Allocation(ExplicitFreeListAllocator)", allocator1, small_allocation_sizes).Dump();
 	RandomAllocateAndFree("Random Small Size Allocation(ExplicitFreeListAllocator)", allocator2, small_allocation_sizes).Dump();
-	AllocateAndFree("Fixed Small Size Allocation(malloc/free)", default_allocator, small_allocation_sizes).Dump();
-	RandomAllocateAndFree("Random Small Size Allocation(malloc/free)", default_allocator, small_allocation_sizes).Dump();
-
-	AllocateAndFree("Fixed Large Size Allocation(ExplicitFreeListAllocator)", allocator1, large_allocation_sizes).Dump();
-	RandomAllocateAndFree("Random Large Size Allocation(ExplicitFreeListAllocator)", allocator2, large_allocation_sizes).Dump();
-	AllocateAndFree("Fixed Large Size Allocation(malloc/free)", default_allocator, large_allocation_sizes).Dump();
-	RandomAllocateAndFree("Random Large Size Allocation(malloc/free)", default_allocator, large_allocation_sizes).Dump();
 
 	delete allocator1;
 	delete allocator2;

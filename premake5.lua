@@ -2,7 +2,7 @@ local solution_dir = "solution/" .. _ACTION
 
 function setupIncludeDirs()
    includedirs {
-      "include"
+      "src"
    }
 end
 
@@ -39,8 +39,8 @@ function setupTestProject()
    language "C++"
 
     files { 
-      "include/detail/*.*", 
-      "include/*.*",
+      "src/detail/*.*", 
+      "src/*.*",
       "test/*.*"
    }
 
